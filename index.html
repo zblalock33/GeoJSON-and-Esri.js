@@ -2,7 +2,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title></title>
+<title>Zachary's GeoJSON</title>
 <style>
 html, body, #viewDiv {
     padding: 0;
@@ -10,33 +10,78 @@ html, body, #viewDiv {
     height: 100%;
     width: 100%;
 }
+#titleDiv {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 20px;
+    z-index: 10;
+}
+.esri-popup .esri-title {
+    background-color: green;
+    color: white;
+}
 </style>
 <link rel="stylesheet" href="https://js.arcgis.com/4.22/esri/themes/light/main.css">
 <script src="https://js.arcgis.com/4.22/"></script>
 </head>
 <body>
-<div id="viewDiv"></div> <!-- This is the container for the MapView -->
+<div id="viewDiv"></div>
+<div id="titleDiv">Zachary's GeoJSON and Esri.js Assignment</div>
 <script>
 require([
     "esri/Map",
     "esri/layers/GeoJSONLayer",
-    "esri/views/MapView"
-], function(Map, GeoJSONLayer, MapView) {
-    var geojsonLayer = new GeoJSONLayer({
-        url: "MegaCities_Blalock.geojson" // Make sure this path is correct relative to where your HTML file is served
+    "esri/views/MapView",
+    "esri/widgets/Legend",
+    "esri/renderers/SimpleRenderer",
+    "esri/symbols/SimpleMarkerSymbol"
+], function(Map, GeoJSONLayer, MapView, Legend, SimpleRenderer, SimpleMarkerSymbol) {
+    var renderer = new SimpleRenderer({
+        symbol: new SimpleMarkerSymbol({
+            color: "green", // Change color to green
+            outline: { // Outline color
+                color: "white",
+                width: 1
+            }
+        })
     });
+
+    var geojsonLayer = new GeoJSONLayer({
+    url: "MegaCities_Blalock.geojson",
+    renderer: renderer, // Assuming you have a renderer defined to style the points
+    outFields: ["*"], // Ensure all fields are available for the popup template
+    popupTemplate: { // Define the popup template
+        title: "{City}", // Use the City property for the title
+        content: "Population (2015): {Pop_2015} million" // Add "million" to indicate the unit
+    }
+});
 
     var map = new Map({
         basemap: "gray-vector",
-        layers: [geojsonLayer] // layers should be an array
+        layers: [geojsonLayer]
     });
 
     var view = new MapView({
-        container: "viewDiv", // Reference to the container element
+        container: "viewDiv",
         map: map,
-        center: [-98.5795, 39.8283], // Adjust as needed
-        zoom: 5 // Adjust as needed
+        center: [-98.5795, 39.8283],
+        zoom: 5
     });
+
+    var legend = new Legend({
+    view: view,
+    layerInfos: [{
+        layer: geojsonLayer,
+        title: "Mega Cities" // Update legend title to "Mega Cities"
+    }]
+});
+
+    view.ui.add(legend, "bottom-right");
 });
 </script>
 </body>
