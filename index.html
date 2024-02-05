@@ -21,9 +21,21 @@ html, body, #viewDiv {
     font-size: 20px;
     z-index: 10;
 }
-.esri-popup .esri-title {
-    background-color: green;
-    color: white;
+#citySelect {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text color */
+    font-weight: bold; /* Bold text */
+    cursor: pointer;
+}
+#citySelect:hover {
+    background-color: #45a049; /* Darker green background on hover */
 }
 </style>
 <link rel="stylesheet" href="https://js.arcgis.com/4.22/esri/themes/light/main.css">
@@ -32,34 +44,33 @@ html, body, #viewDiv {
 <body>
 <div id="viewDiv"></div>
 <div id="titleDiv">Zachary's GeoJSON and Esri.js Assignment</div>
+<select id="citySelect">
+    <option value="">Select a Mega City</option>
+    <!-- Populate with cities from the GeoJSON -->
+</select>
 <script>
 require([
     "esri/Map",
     "esri/layers/GeoJSONLayer",
     "esri/views/MapView",
-    "esri/widgets/Legend",
-    "esri/renderers/SimpleRenderer",
-    "esri/symbols/SimpleMarkerSymbol"
-], function(Map, GeoJSONLayer, MapView, Legend, SimpleRenderer, SimpleMarkerSymbol) {
-    var renderer = new SimpleRenderer({
-        symbol: new SimpleMarkerSymbol({
-            color: "green", // Change color to green
-            outline: { // Outline color
-                color: "white",
-                width: 1
-            }
-        })
-    });
-
+    "esri/Graphic"
+], function(Map, GeoJSONLayer, MapView, Graphic) {
     var geojsonLayer = new GeoJSONLayer({
-    url: "MegaCities_Blalock.geojson",
-    renderer: renderer, // Assuming you have a renderer defined to style the points
-    outFields: ["*"], // Ensure all fields are available for the popup template
-    popupTemplate: { // Define the popup template
-        title: "{City}", // Use the City property for the title
-        content: "Population (2015): {Pop_2015} million" // Add "million" to indicate the unit
-    }
-});
+        url: "MegaCities_Blalock.geojson",
+        outFields: ["*"],
+        renderer: {
+            type: "simple",
+            symbol: {
+                type: "simple-marker",
+                color: "green",
+                size: "8px"
+            }
+        },
+        popupTemplate: {
+            title: "{City}",
+            content: "Population: {Pop_2015} million"
+        }
+    });
 
     var map = new Map({
         basemap: "gray-vector",
@@ -73,15 +84,37 @@ require([
         zoom: 5
     });
 
-    var legend = new Legend({
-    view: view,
-    layerInfos: [{
-        layer: geojsonLayer,
-        title: "Mega Cities" // Update legend title to "Mega Cities"
-    }]
-});
+    geojsonLayer.when(function() {
+        return geojsonLayer.queryFeatures();
+    }).then(function(results) {
+        var features = results.features;
+        var select = document.getElementById("citySelect");
+        features.forEach(function(feature) {
+            var option = document.createElement("option");
+            option.value = feature.attributes.ObjectId;
+            option.text = feature.attributes.City;
+            select.appendChild(option);
+        });
+    });
 
-    view.ui.add(legend, "bottom-right");
+    document.getElementById("citySelect").addEventListener("change", function(event) {
+        var objectId = event.target.value;
+        if (objectId) {
+            geojsonLayer.queryFeatures({
+                objectIds: [parseInt(objectId)],
+                returnGeometry: true,
+                outFields: ["*"]
+            }).then(function(results) {
+                if (results.features.length > 0) {
+                    var feature = results.features[0];
+                    view.goTo({
+                        target: feature.geometry,
+                        zoom: 10
+                    });
+                }
+            });
+        }
+    });
 });
 </script>
 </body>
