@@ -75,14 +75,14 @@
                 symbol: {
                     type: "simple-marker",
                     color: "#790907", 
-                    size: "8px"
+                    size: "12px"
                 }
             },
-            popupTemplate: {
-                title: "{City}",
-                content: "Population: {Pop_2015} million"
-            }
-        });
+        popupTemplate: {
+            title: "<div style='color: #790907; font-weight: bold;'>{City}</div>",
+            content: "<div style='background-color: #790907; color: white; padding: 5px; border-radius: 5px; font-weight: bold;'>Population: {Pop_2015} million</div>"
+        }
+    });
     
         var map = new Map({
             basemap: "gray-vector",
