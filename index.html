@@ -1,121 +1,133 @@
-<html>
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>Zachary's GeoJSON</title>
-<style>
-html, body, #viewDiv {
-    padding: 0;
-    margin: 0;
-    height: 100%;
-    width: 100%;
-}
-#titleDiv {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: white;
-    padding: 5px;
-    border-radius: 5px;
-    font-size: 20px;
-    z-index: 10;
-}
-#citySelect {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 10;
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #4CAF50; /* Green background */
-    color: white; /* White text color */
-    font-weight: bold; /* Bold text */
-    cursor: pointer;
-}
-#citySelect:hover {
-    background-color: #45a049; /* Darker green background on hover */
-}
-</style>
-<link rel="stylesheet" href="https://js.arcgis.com/4.22/esri/themes/light/main.css">
-<script src="https://js.arcgis.com/4.22/"></script>
-</head>
-<body>
-<div id="viewDiv"></div>
-<div id="titleDiv">Zachary's GeoJSON and Esri.js Assignment</div>
-<select id="citySelect">
-    <option value="">Select a Mega City</option>
-    <!-- Populate with cities from the GeoJSON -->
-</select>
-<script>
-require([
-    "esri/Map",
-    "esri/layers/GeoJSONLayer",
-    "esri/views/MapView",
-    "esri/Graphic"
-], function(Map, GeoJSONLayer, MapView, Graphic) {
-    var geojsonLayer = new GeoJSONLayer({
-        url: "MegaCities_Blalock.geojson",
-        outFields: ["*"],
-        renderer: {
-            type: "simple",
-            symbol: {
-                type: "simple-marker",
-                color: "green",
-                size: "8px"
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Zachary's GeoJSON</title>
+    <style>
+    html, body, #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+    }
+    #titleDiv {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #790907;
+        color: white;
+        padding: 5px;
+        border-radius: 5px;
+        font-size: 20px;
+        z-index: 10;
+    }
+    #infoDiv {
+        position: absolute;
+        top: 70px; 
+        right: 10px;
+        background-color: black;
+        color: white;
+        padding: 5px;
+        border-radius: 5px;
+        font-size: 16px;
+        z-index: 10;
+    }
+    #citySelect {
+        position: absolute;
+        top: 100px; 
+        right: 10px;
+        z-index: 10;
+        padding: 5px 10px;
+        border: 1px solid #050505;
+        border-radius: 5px;
+        background-color: #790907; 
+        color: white; 
+        font-weight: bold;
+        cursor: pointer;
+    }
+    #citySelect:hover {
+        background-color: #45a049; 
+    }
+    </style>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.22/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.22/"></script>
+    </head>
+    <body>
+    <div id="viewDiv"></div>
+    <div id="titleDiv">Zachary's GeoJSON and Esri.js Assignment</div>
+    <div id="infoDiv">Click on each Mega City marker to retrieve population data.</div>
+    <select id="citySelect">
+        <option value="">Select a Mega City</option>
+        <!-- Populate with cities from the GeoJSON -->
+    </select>
+    <script>
+    require([
+        "esri/Map",
+        "esri/layers/GeoJSONLayer",
+        "esri/views/MapView",
+        "esri/Graphic"
+    ], function(Map, GeoJSONLayer, MapView, Graphic) {
+        var geojsonLayer = new GeoJSONLayer({
+            url: "MegaCities_Blalock.geojson",
+            outFields: ["*"],
+            renderer: {
+                type: "simple",
+                symbol: {
+                    type: "simple-marker",
+                    color: "#790907", 
+                    size: "8px"
+                }
+            },
+            popupTemplate: {
+                title: "{City}",
+                content: "Population: {Pop_2015} million"
             }
-        },
-        popupTemplate: {
-            title: "{City}",
-            content: "Population: {Pop_2015} million"
-        }
-    });
-
-    var map = new Map({
-        basemap: "gray-vector",
-        layers: [geojsonLayer]
-    });
-
-    var view = new MapView({
-        container: "viewDiv",
-        map: map,
-        center: [-98.5795, 39.8283],
-        zoom: 5
-    });
-
-    geojsonLayer.when(function() {
-        return geojsonLayer.queryFeatures();
-    }).then(function(results) {
-        var features = results.features;
-        var select = document.getElementById("citySelect");
-        features.forEach(function(feature) {
-            var option = document.createElement("option");
-            option.value = feature.attributes.ObjectId;
-            option.text = feature.attributes.City;
-            select.appendChild(option);
+        });
+    
+        var map = new Map({
+            basemap: "gray-vector",
+            layers: [geojsonLayer]
+        });
+    
+        var view = new MapView({
+            container: "viewDiv",
+            map: map,
+            center: [-98.5795, 39.8283],
+            zoom: 5
+        });
+    
+        geojsonLayer.when(function() {
+            return geojsonLayer.queryFeatures();
+        }).then(function(results) {
+            var features = results.features;
+            var select = document.getElementById("citySelect");
+            features.forEach(function(feature) {
+                var option = document.createElement("option");
+                option.value = feature.attributes.ObjectId;
+                option.text = feature.attributes.City;
+                select.appendChild(option);
+            });
+        });
+    
+        document.getElementById("citySelect").addEventListener("change", function(event) {
+            var objectId = event.target.value;
+            if (objectId) {
+                geojsonLayer.queryFeatures({
+                    objectIds: [parseInt(objectId)],
+                    returnGeometry: true,
+                    outFields: ["*"]
+                }).then(function(results) {
+                    if (results.features.length > 0) {
+                        var feature = results.features[0];
+                        view.goTo({
+                            target: feature.geometry,
+                            zoom: 10
+                        });
+                    }
+                });
+            }
         });
     });
-
-    document.getElementById("citySelect").addEventListener("change", function(event) {
-        var objectId = event.target.value;
-        if (objectId) {
-            geojsonLayer.queryFeatures({
-                objectIds: [parseInt(objectId)],
-                returnGeometry: true,
-                outFields: ["*"]
-            }).then(function(results) {
-                if (results.features.length > 0) {
-                    var feature = results.features[0];
-                    view.goTo({
-                        target: feature.geometry,
-                        zoom: 10
-                    });
-                }
-            });
-        }
-    });
-});
-</script>
-</body>
-</html>
+    </script>
+    </body>
+    </html>
