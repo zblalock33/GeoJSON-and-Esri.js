@@ -13,27 +13,26 @@ html, body, #viewDiv {
 </style>
 <link rel="stylesheet" href="https://js.arcgis.com/4.22/esri/themes/light/main.css">
 <script src="https://js.arcgis.com/4.22/"></script>
-
-
+</head>
+<body>
+<div id="viewDiv"></div> <!-- This is the container for the MapView -->
 <script>
-
 require([
-"esri/Map",
+    "esri/Map",
     "esri/layers/GeoJSONLayer",
     "esri/views/MapView"
 ], function(Map, GeoJSONLayer, MapView) {
-    var map = new Map({
-        basemap: "topo-vector"
-    });
-
     var geojsonLayer = new GeoJSONLayer({
         url: "MegaCities_Blalock.geojson" // Make sure this path is correct relative to where your HTML file is served
     });
 
-    map.add(geojsonLayer);
+    var map = new Map({
+        basemap: "gray-vector",
+        layers: [geojsonLayer] // layers should be an array
+    });
 
     var view = new MapView({
-        container: "viewDiv",
+        container: "viewDiv", // Reference to the container element
         map: map,
         center: [-98.5795, 39.8283], // Adjust as needed
         zoom: 5 // Adjust as needed
